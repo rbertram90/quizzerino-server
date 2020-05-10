@@ -1,0 +1,41 @@
+{
+    "name": "rbwebdesigns/quizzerino",
+    "description": "A quiz app in the browser",
+    "homepage": "https://quiz.rbwebdesigns.co.uk/",
+    "keywords": ["game", "quiz", "multiplayer", "web browser", "websockets", "php"],
+    "type": "project",
+    "license": "GPL-3.0-only",
+    "authors": [
+        {
+            "name": "Ricky Bertram",
+            "email": "ricky@rbwebdesigns.co.uk"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/rbertram90/quizzerino-open-trivia-source.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/rbertram90/quizzerino-installer.git"
+        }
+    ],
+    "require": {
+        "cboden/ratchet": "^0.4.1@stable",
+        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master"
+    },
+    "minimum-stability": "dev",
+	"autoload": {
+        "psr-4": {
+            "rbwebdesigns\\quizzerino\\": "app/",
+            "quizzerino\\": "quizzes/"
+        }
+    },
+    "extra": {
+        "installer-types": ["quizzerino-question-source"],
+        "installer-paths": {
+            "quizzes/{$name}/": ["type:quizzerino-question-source"]
+        }
+    }
+}
