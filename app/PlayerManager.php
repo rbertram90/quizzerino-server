@@ -161,7 +161,7 @@ class PlayerManager
      * Update the status of all players
      */
     public function changeAllPlayersStatus($status) {
-        foreach ($this->players as $player) {
+        foreach ($this->players as &$player) {
             $player->status = $status;
         }
     }

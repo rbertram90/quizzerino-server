@@ -49,6 +49,8 @@ class Game implements MessageComponentInterface
 
     public $currentQuestionNumber = 0;
 
+    protected $currentQuestion = null;
+
     /** @var int  Minimum number of players required to play this game */
     public static $minPlayers = 3;
 
@@ -62,7 +64,7 @@ class Game implements MessageComponentInterface
     // public $roundNumber = 0;
 
     // Player statuses
-    public const STATUS_IN_PLAY = 'Choosing card(s)';
+    public const STATUS_IN_PLAY = 'Thinking...';
     public const STATUS_ANSWER_CHOSEN = 'Answer submitted';
     public const STATUS_CONNECTED = 'Connected';
     public const STATUS_DISCONNECTED = 'Disconnected';
@@ -249,16 +251,8 @@ class Game implements MessageComponentInterface
     protected function start($options)
     {
         $this->quizId = $options['quiz'];
-
-        $this->messenger->sendToAll([
-            'type' => 'round_start',
-            'question' => $this->getNextQuestion(),
-            'questionNumber' => $this->currentQuestionNumber,
-            // 'roundTime' => $this->roundTime,
-            'players' => $this->playerManager->getActivePlayers()
-        ]);
-
         $this->status = self::GAME_STATUS_PLAYERS_CHOOSING;
+        $this->nextRound();        
     }
 
     /**
@@ -274,6 +268,8 @@ class Game implements MessageComponentInterface
      */
     protected function nextRound()
     {
+        $this->playerManager->changeAllPlayersStatus(self::STATUS_IN_PLAY);
+
         $this->messenger->sendToAll([
             'type' => 'round_start',
             'question' => $this->getNextQuestion(),
@@ -293,6 +289,12 @@ class Game implements MessageComponentInterface
     {
         $player = $this->playerManager->getPlayerByResourceId($from->resourceId);
         $player->status = self::STATUS_ANSWER_CHOSEN;
+        $answer = $data['answer'];
+        $correctAnswer = $this->currentQuestion['correct_option_index'];
+
+        if ($answer == $correctAnswer) {
+            $player->score++;
+        }
 
         // send message to all clients that user has submitted
         $this->messenger->sendToAll([
@@ -326,15 +328,23 @@ class Game implements MessageComponentInterface
         return true;
     }
 
-
+    /**
+     * Get the next question in the quiz - this in turn
+     * calls the quiz controller
+     */
     protected function getNextQuestion() {
         $this->currentQuestionNumber++;
         // This is the core logic we need to get the next question....
         $controller = $this->getQuizController();
-        return $controller->getQuestion();
+        $this->currentQuestion = $controller->getQuestion();
+        return $this->currentQuestion;
     }
 
 
+    /**
+     * Get the controller class instance from the quizId
+     * set in config
+     */
     protected function getQuizController() {
         if (!is_null($this->quizController)) return $this->quizController;
 

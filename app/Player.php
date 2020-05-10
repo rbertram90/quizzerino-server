@@ -27,6 +27,7 @@ class Player
         $this->isActive = true;
         $this->status = Game::STATUS_CONNECTED;
         $this->game = $game;
+        $this->score = 0;
         $this->reset();
     }
 
@@ -54,7 +55,6 @@ class Player
      * Reset player data for new game
      */
     public function reset() {
-        $this->cards = [];
         $this->score = 0;
     }
 

@@ -15,7 +15,7 @@ use rbwebdesigns\quizzerino\Game;
  * @author R Bertram <ricky@rbwebdesigns.co.uk>
  */
 
-$version = '2020-05-09';
+$version = '2020-05-10';
 
 require __DIR__ . '/vendor/autoload.php';
 
