@@ -4,9 +4,10 @@ use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use rbwebdesigns\quizzerino\Game;
+use rbwebdesigns\quizzerino\Logger;
 
 /**
- * Web Quiz game server
+ * Quizzerino game server
  * 
  * This is the main entrypoint to starting the PHP Ratchet web server
  * before running this script the configuration file must have been
@@ -15,17 +16,17 @@ use rbwebdesigns\quizzerino\Game;
  * @author R Bertram <ricky@rbwebdesigns.co.uk>
  */
 
-$version = '2020-05-10';
+$version = '2020-05-11';
 
 require __DIR__ . '/vendor/autoload.php';
 
 if (PHP_SAPI !== 'cli') {
-    print "Server must be run from command line";
+    Logger::error("Server must be run from command line");
     exit;
 }
 
 if (!file_exists(__DIR__ . '/config.json')) {
-    print "Please copy config_default.json to config.json and check server variables";
+    Logger::error("Please copy config_default.json to config.json and check server variables");
     exit;
 }
 
@@ -36,16 +37,14 @@ print "***********************************\n\n";
 
 $config = json_decode(file_get_contents(__DIR__ . '/config.json'), true);
 
-print "Loaded configuration:\n\n";
+Logger::info("Loaded configuration:");
 
 foreach ($config as $key => $value) {
     define(strtoupper($key), $value);
-    print strtoupper($key) .' = '. $value .PHP_EOL;
+    Logger::info(strtoupper($key) .' = '. $value);
 }
 
 define('ROOT_DIR', __DIR__);
-
-print PHP_EOL;
 
 /**
  * Create the server class, each of the layers provide part of the request
@@ -87,6 +86,6 @@ $server = IoServer::factory(
     SERVER_PORT
 );
 
-print "Game server ready, awaiting new connections...\n\n";
+Logger::info("Game server ready, awaiting new connections...");
 
 $server->run();

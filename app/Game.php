@@ -17,7 +17,7 @@ use Ratchet\ConnectionInterface;
 class Game implements MessageComponentInterface
 {
     /**
-     * @var \SplObjectStorage collection of currently connected
+     * @var \SplObjectStorage Collection of currently connected
      *   clients (\Ratchet\ConnectionInterface)
      */
     protected $clients;
@@ -43,25 +43,20 @@ class Game implements MessageComponentInterface
     // questions - dynamically created when ready
     protected $quizController = null;
 
-
     /** @var \rbwebdesigns\quizzerino\QuestionCardManager */
     public $questionManager = null;
 
+    /** @var int Current question (sequential) */
     public $currentQuestionNumber = 0;
 
+    /** @var array Current question data */
     protected $currentQuestion = null;
 
-    /** @var int  Minimum number of players required to play this game */
-    public static $minPlayers = 3;
-
-    /** @var int  Maximum time for playeres to choose their cards in seconds (0 = infinite) */
+    /** @var int  Maximum time for playeres to choose their cards in seconds (0 = infinite) (@todo) */
     public $roundTime = 0;
 
-    /** @var int  How many points does a player require to win the game */
+    /** @var int  How many points does a player require to win the game (@todo) */
     public $winningScore = 5;
-
-    /** @var int  How many rounds have been successfully finished */
-    // public $roundNumber = 0;
 
     // Player statuses
     public const STATUS_IN_PLAY = 'Thinking...';
@@ -228,6 +223,16 @@ class Game implements MessageComponentInterface
             'quiz_options' => $this->getQuizList(),
         ]);
 
+        if ($this->status == self::GAME_STATUS_PLAYERS_CHOOSING) {
+            $this->messenger->sendMessage($from, [
+                'type' => 'round_start',
+                'question' => $this->getNextQuestion(),
+                'questionNumber' => $this->currentQuestionNumber,
+                // 'roundTime' => $this->roundTime,
+                'players' => $this->playerManager->getActivePlayers()
+            ]);
+        }
+
         // If they're reconnecting, then send them the data
         // if (count($player->cards) > 0) {
         //     $this->messenger->sendMessage($player->getConnection(), []);
@@ -332,7 +337,8 @@ class Game implements MessageComponentInterface
      * Get the next question in the quiz - this in turn
      * calls the quiz controller
      */
-    protected function getNextQuestion() {
+    protected function getNextQuestion()
+    {
         $this->currentQuestionNumber++;
         // This is the core logic we need to get the next question....
         $controller = $this->getQuizController();
@@ -340,26 +346,31 @@ class Game implements MessageComponentInterface
         return $this->currentQuestion;
     }
 
-
     /**
      * Get the controller class instance from the quizId
      * set in config
      */
-    protected function getQuizController() {
+    protected function getQuizController()
+    {
         if (!is_null($this->quizController)) return $this->quizController;
-
-        if (is_null($this->quizList)) print "ERROR: Quiz list empty!" . PHP_EOL;
+        if (is_null($this->quizList)) Logger::error("Quiz list empty!");
 
         foreach ($this->quizList as $quiz) {
             if ($quiz->id == $this->quizId) {
                 $controllerName = $quiz->controller;
-                $this->quizController = new $controllerName();
+                $data = false;
+
+                if (property_exists($quiz, 'settings')) {
+                    $data = $quiz->settings;
+                }
+
+                $this->quizController = new $controllerName($data);
 
                 if ($this->quizController && $this->quizController instanceof SourceInterface) {
                     return $this->quizController;
                 }
                 else {
-                    print "Quiz controller not found/correct - must implement \\rbwebdesigns\\quizzerino\\SourceInterface";
+                    Logger::error("Quiz controller not found/correct - must implement \\rbwebdesigns\\quizzerino\\SourceInterface");
                 }
             }
         }
@@ -368,9 +379,10 @@ class Game implements MessageComponentInterface
     /**
      * Gets the list of quizzes installed on this server
      * 
-     * @return mixed[]
+     * @return StdClass[]
      */
-    protected function getQuizList() {
+    protected function getQuizList() : array
+    {
         // Check if we've already run this process since server start
         if (is_null($this->quizList)) {
 
