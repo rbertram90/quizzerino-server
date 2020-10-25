@@ -1,15 +1,15 @@
 <?php
 namespace rbwebdesigns\quizzerino;
 
-class PlayerManager
-{
-    /** @var rbwebdesigns\quizzerino\Player[] */
+class PlayerManager {
+
+    /** @var Player[] */
     protected $players;
 
-    /** @var rbwebdesigns\quizzerino\Game */
+    /** @var Game */
     protected $game;
 
-    /** @var rbwebdesigns\quizzerino\Player */
+    /** @var Player */
     protected $hostPlayer;
 
     public function __construct($game)
@@ -27,7 +27,7 @@ class PlayerManager
      * @param ConnectionInterface $conn
      *  Connection object from client
      * 
-     * @return rbwebdesigns\quizzerino\Player|boolean
+     * @return Player|boolean
      *   If username exists and is connected to game then returns false.
      *   Otherwise returns Player object
      */
@@ -62,7 +62,7 @@ class PlayerManager
     /**
      * Get a connected player by their username
      * 
-     * @return rbwebdesigns\fill_in_the_blanks\Player|null
+     * @return \rbwebdesigns\quizzerino\Player|null
      */
     public function getPlayerByUsername($username)
     {
@@ -77,7 +77,7 @@ class PlayerManager
     /**
      * Get a connected player by their resource (socket) Id
      * 
-     * @return rbwebdesigns\fill_in_the_blanks\Player|null
+     * @return \rbwebdesigns\quizzerino\Player|null
      */
     public function getPlayerByResourceId($resourceId)
     {
@@ -92,7 +92,7 @@ class PlayerManager
     /**
      * Get all players in the game (active and not)
      * 
-     * @return rbwebdesigns\fill_in_the_blanks\Player[]
+     * @return \rbwebdesigns\quizzerino\Player[]
      */
     public function getAllPlayers()
     {

@@ -16,10 +16,7 @@ use Ratchet\ConnectionInterface;
  */
 class Game implements MessageComponentInterface
 {
-    /**
-     * @var \SplObjectStorage Collection of currently connected
-     *   clients (\Ratchet\ConnectionInterface)
-     */
+    /** @var \SplObjectStorage Collection of currently connected clients (\Ratchet\ConnectionInterface) */
     protected $clients;
 
     /** @var \rbwebdesigns\quizzerino\PlayerManager */
@@ -43,8 +40,11 @@ class Game implements MessageComponentInterface
     // questions - dynamically created when ready
     protected $quizController = null;
 
-    /** @var \rbwebdesigns\quizzerino\QuestionCardManager */
-    public $questionManager = null;
+    // Reference to the game server
+    protected $server = null;
+
+    /** @var \React\EventLoop\TimerInterface */
+    protected $roundEndTimer = null;
 
     /** @var int Current question (sequential) */
     public $currentQuestionNumber = 0;
@@ -52,11 +52,11 @@ class Game implements MessageComponentInterface
     /** @var array Current question data */
     protected $currentQuestion = null;
 
-    /** @var int  Maximum time for playeres to choose their cards in seconds (0 = infinite) (@todo) */
-    public $roundTime = 0;
+    /** @var int  Maximum time for players to answer a question */
+    public $timeLimit = 0;
 
-    /** @var int  How many points does a player require to win the game (@todo) */
-    public $winningScore = 5;
+    /** @var int  How many questions are asked in a round */
+    public $questionsPerRound = 5;
 
     // Player statuses
     public const STATUS_IN_PLAY = 'Thinking...';
@@ -80,7 +80,7 @@ class Game implements MessageComponentInterface
     {
         $this->clients = new \SplObjectStorage;
         $this->playerManager = new PlayerManager($this);
-       //  $this->questionManager = new QuestionManager;
+        // $this->questionManager = new QuestionManager;
         $this->messenger = new Messenger($this);
         $this->status = self::GAME_STATUS_AWAITING_START;
     }
@@ -88,7 +88,7 @@ class Game implements MessageComponentInterface
     /**
      * Connection opened callback
      * 
-     * @param Ratchet\ConnectionInterface $conn
+     * @param \Ratchet\ConnectionInterface $conn
      */
     public function onOpen(ConnectionInterface $conn)
     {
@@ -99,7 +99,7 @@ class Game implements MessageComponentInterface
     /**
      * Message recieved callback
      * 
-     * @param Ratchet\ConnectionInterface $from
+     * @param \Ratchet\ConnectionInterface $from
      * @param string $msg
      *   json string containing data from client
      */
@@ -145,7 +145,7 @@ class Game implements MessageComponentInterface
     /**
      * Connection closed / player has disconnected
      * 
-     * @param Ratchet\ConnectionInterface $conn
+     * @param \Ratchet\ConnectionInterface $conn
      */
     public function onClose(ConnectionInterface $conn)
     {
@@ -154,14 +154,13 @@ class Game implements MessageComponentInterface
         echo "Connection {$conn->resourceId} has disconnected\n";
 
         $disconnectedPlayer = $this->playerManager->markPlayerAsInactive($conn->resourceId);
-        
     }
 
     /**
      * An error has occured with a connected client
      * 
-     * @param Ratchet\ConnectionInterface $conn
-     * @param Exception $e
+     * @param \Ratchet\ConnectionInterface $conn
+     * @param \Exception $e
      */
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
@@ -172,7 +171,7 @@ class Game implements MessageComponentInterface
     /**
      * Get all the data on the connected clients
      * 
-     * @return SplObjectStorage
+     * @return \SplObjectStorage
      */
     public function getConnectedClients()
     {
@@ -256,8 +255,12 @@ class Game implements MessageComponentInterface
     protected function start($options)
     {
         $this->quizId = $options['quiz'];
+        $this->questionsPerRound = $options['numberOfQuestions'];
+        $this->timeLimit = intval($options['timeLimit']);
+        if ($this->timeLimit === 0) $this->timeLimit = 999999; // almost infinite!
+        else $this->timeLimit *= 10;
         $this->status = self::GAME_STATUS_PLAYERS_CHOOSING;
-        $this->nextRound();        
+        $this->nextRound();
     }
 
     /**
@@ -273,15 +276,52 @@ class Game implements MessageComponentInterface
      */
     protected function nextRound()
     {
-        $this->playerManager->changeAllPlayersStatus(self::STATUS_IN_PLAY);
+        // Note - currentQuestionNumber will be 0 indexed at this point
+        if ($this->currentQuestionNumber > $this->questionsPerRound - 1) {
+            // Finish quiz here
+            return $this->endQuiz();
+        }
 
-        $this->messenger->sendToAll([
+        $this->playerManager->changeAllPlayersStatus(self::STATUS_IN_PLAY);
+        $roundEnd = time() + $this->timeLimit;
+
+        // Set-up timer for round end
+        if ($this->timeLimit) {
+            $this->roundEndTimer = $this->server->loop->addTimer($this->timeLimit, function() {
+                $this->endRound();
+            });
+        }
+
+        $messageData = [
             'type' => 'round_start',
             'question' => $this->getNextQuestion(),
             'questionNumber' => $this->currentQuestionNumber,
-            // 'roundTime' => $this->roundTime,
+            'roundTime' => $this->timeLimit,
+            'roundEndTimeUTC' => $roundEnd,
             'players' => $this->playerManager->getActivePlayers()
-        ]);
+        ];
+
+        $this->messenger->sendToAll($messageData);
+    }
+
+    /**
+     * End the round before everyone has submitted
+     */
+    protected function endRound() {
+        // Maybe do something here?
+        $this->nextRound();
+    }
+
+    /**
+     * All rounds completed - show results
+     */
+    protected function endQuiz() {
+        $messageData = [
+            'type' => 'game_end',
+            'players' => $this->playerManager->getActivePlayers()
+        ];
+
+        $this->messenger->sendToAll($messageData);
     }
 
     /**
@@ -310,6 +350,10 @@ class Game implements MessageComponentInterface
 
         // Check if all players have submitted cards
         if ($this->allPlayersDone()) {
+            if (!is_null($this->roundEndTimer)) {
+                $this->server->loop->cancelTimer($this->roundEndTimer);
+                $this->roundEndTimer = null;
+            }
             $this->nextRound();
         }
     }
@@ -379,7 +423,7 @@ class Game implements MessageComponentInterface
     /**
      * Gets the list of quizzes installed on this server
      * 
-     * @return StdClass[]
+     * @return \StdClass[]
      */
     protected function getQuizList() : array
     {
@@ -411,6 +455,24 @@ class Game implements MessageComponentInterface
         }
 
         return $this->quizList;
+    }
+
+    /**
+     * Setter method for server - has not been created when class is initialised
+     *
+     * @param $server
+     */
+    public function setServer($server) {
+        $this->server = $server;
+    }
+
+    /**
+     * Getter method for server
+     *
+     * @return \Ratchet\Server\IoServer
+     */
+    public function getServer() {
+        return $this->server;
     }
 
 }

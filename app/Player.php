@@ -1,8 +1,9 @@
 <?php
 namespace rbwebdesigns\quizzerino;
 
-class Player
-{
+use Ratchet\ConnectionInterface;
+
+class Player {
 
     public $username;
     public $ip;
@@ -12,7 +13,7 @@ class Player
     public $score;
     public $icon;
 
-    /** @var rbwebdesigns\fill_in_the_blanks\Game */
+    /** @var Game */
     protected $game;
 
     /** @var ConnectionInterface */

@@ -1,11 +1,18 @@
 <?php
 namespace rbwebdesigns\quizzerino;
 
-class Messenger
-{
+use Ratchet\ConnectionInterface;
+use React\EventLoop\TimerInterface;
 
+class Messenger {
+
+    /** @var Game */
     protected $game;
 
+    /**
+     * Messenger constructor.
+     * @param Game $game
+     */
     public function __construct($game) {
         $this->game = $game;
     }
@@ -47,6 +54,27 @@ class Messenger
         // Send to host - assuming host is always client 0
         $clients->rewind();
         $this->sendMessage($clients->current(), $data);
+    }
+
+    /**
+     * Send a delayed message (concept) - not sure if this can work - using server->loop?
+     *
+     * @param ConnectionInterface $client
+     * @param mixed[] $data
+     * @param float $delay Delay in seconds
+     *
+     * @return TimerInterface
+     */
+    public function sendDelayed($client, $data, $delay) : TimerInterface {
+        $server = $this->game->getServer();
+
+        print "Queuing message" . PHP_EOL;
+
+        return $server->loop->addTimer($delay, function() use ($client, $data) {
+            print "Sending delayed message to ({$client->resourceId}): {$data['type']}".PHP_EOL;
+            $msg = json_encode($data);
+            $client->send($msg);
+        });
     }
 
 }

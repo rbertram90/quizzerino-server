@@ -16,7 +16,7 @@ use rbwebdesigns\quizzerino\Logger;
  * @author R Bertram <ricky@rbwebdesigns.co.uk>
  */
 
-$version = '2020-05-11';
+$version = '2020-10-25';
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -77,14 +77,17 @@ define('ROOT_DIR', __DIR__);
  * It implements the MessageComponentInterface so is required to provide an implementation
  * for onOpen, onClose, onMessage and onError methods.
  */
+
+$game = new Game();
+
 $server = IoServer::factory(
     new HttpServer(
-        new WsServer(
-            new Game()
-        )
+        new WsServer($game)
     ),
     SERVER_PORT
 );
+
+$game->setServer($server);
 
 Logger::info("Game server ready, awaiting new connections...");
 

@@ -23,7 +23,8 @@
     ],
     "require": {
         "cboden/ratchet": "^0.4.1@stable",
-        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master"
+        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master",
+        "ext-json": "*"
     },
     "minimum-stability": "dev",
 	"autoload": {
