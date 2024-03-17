@@ -1,23 +1,15 @@
 <?php
 namespace rbwebdesigns\quizzerino;
 
+use Ratchet\ConnectionInterface;
+use rbwebdesigns\quizzerino\Enum\PlayerStatus;
+
 class PlayerManager {
 
     /** @var Player[] */
-    protected $players;
+    protected array $players = [];
 
-    /** @var Game */
-    protected $game;
-
-    /** @var Player */
-    protected $hostPlayer;
-
-    public function __construct($game)
-    {
-        $this->players = [];
-        $this->hostPlayer = null;
-        $this->game = $game;
-    }
+    protected ?Player $hostPlayer = null;
 
     /**
      * Create a new player or re-connect one that has previously disconnected
@@ -31,7 +23,7 @@ class PlayerManager {
      *   If username exists and is connected to game then returns false.
      *   Otherwise returns Player object
      */
-    public function connectPlayer($data, $conn)
+    public function connectPlayer(array $data, ConnectionInterface $conn)
     {
         $player = $this->getPlayerByUsername($data['username']);
         if (!is_null($player)) {
@@ -40,11 +32,11 @@ class PlayerManager {
             }
             $player->setConnection($conn);
             $player->isActive = true;
-            $player->status = $this->game::STATUS_CONNECTED;
+            $player->status = PlayerStatus::STATUS_CONNECTED;
             return $player;
         }
 
-        $player = new Player($conn, $this->game);
+        $player = new Player($conn);
         $player->username = $data['username'];
         $player->icon = $data['icon'];
         $player->ip = $conn->remoteAddress;
@@ -100,6 +92,22 @@ class PlayerManager {
     }
 
     /**
+     * Get all the data on the connected clients
+     * 
+     * @return ConnectionInterface[]
+     */
+    public function getConnectedClients(): array
+    {
+        $connections = [];
+        foreach ($this->players as $player) {
+            if ($player->isActive) {
+                $connections[] = $player->getConnection();
+            }
+        }
+        return $connections;
+    }
+
+    /**
      * Get all players currently connected
      */
     public function getActivePlayers()
@@ -134,33 +142,23 @@ class PlayerManager {
     /**
      * Reset player data
      */
-    public function resetPlayers() {
+    public function resetPlayers()
+    {
         $activePlayers = $this->getActivePlayers();
 
         foreach ($activePlayers as $player) {
             $player->reset();
         }
-        $this->currentPlayer = $activePlayers[0];
-    }
 
-    /**
-     * Check if a player has acheieve enough points to win the game
-     * 
-     * @return boolean
-     */
-    public function playerHasWon() {
-        foreach ($this->players as $player) {
-            if ($player->score >= $this->game->winningScore) {
-                return true;
-            }
-        }
-        return false;
+        // ???
+        // $this->currentPlayer = $activePlayers[0];
     }
 
     /**
      * Update the status of all players
      */
-    public function changeAllPlayersStatus($status) {
+    public function changeAllPlayersStatus(PlayerStatus $status)
+    {
         foreach ($this->players as &$player) {
             $player->status = $status;
         }
@@ -169,7 +167,8 @@ class PlayerManager {
     /**
      * Get the host player
      */
-    public function getHostPlayer() {
+    public function getHostPlayer()
+    {
         return $this->hostPlayer;
     }
 

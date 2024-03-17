@@ -2,42 +2,34 @@
 namespace rbwebdesigns\quizzerino;
 
 use Ratchet\ConnectionInterface;
+use rbwebdesigns\quizzerino\Enum\PlayerStatus;
 
 class Player {
 
     public $username;
     public $ip;
     public $isGameHost = false;
-    public $isActive; // has the player disconnected?
-    public $status;
+    // has the player disconnected?
+    public $isActive;
+    public PlayerStatus $status;
     public $score;
     public $icon;
 
-    /** @var Game */
-    protected $game;
-
-    /** @var ConnectionInterface */
-    protected $connection;
+    protected ConnectionInterface $connection;
 
     /**
      * class Player constructor
      */
-    public function __construct($connection, $game)
+    public function __construct(ConnectionInterface $connection)
     {
         $this->connection = $connection;
         $this->isActive = true;
-        $this->status = Game::STATUS_CONNECTED;
-        $this->game = $game;
+        $this->status = PlayerStatus::STATUS_CONNECTED;
         $this->score = 0;
         $this->reset();
     }
 
-    /**
-     * Get the connection object
-     * 
-     * @return ConnectionInterface
-     */
-    public function getConnection()
+    public function getConnection(): ConnectionInterface
     {
         return $this->connection;
     }
@@ -47,7 +39,7 @@ class Player {
      * 
      * @param ConnectionInterface $connection
      */
-    public function setConnection($connection)
+    public function setConnection(ConnectionInterface $connection)
     {
         $this->connection = $connection;
     }
@@ -55,15 +47,17 @@ class Player {
     /**
      * Reset player data for new game
      */
-    public function reset() {
+    public function reset()
+    {
         $this->score = 0;
     }
 
     /**
      * Set the player as inactive
      */
-    public function setInactive() {
-        $this->status = Game::STATUS_DISCONNECTED;
+    public function setInactive()
+    {
+        $this->status = PlayerStatus::STATUS_DISCONNECTED;
         $this->isActive = false;
     }
 

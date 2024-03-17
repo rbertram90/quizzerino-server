@@ -22,11 +22,16 @@
         }
     ],
     "require": {
-        "cboden/ratchet": "^0.4.1@stable",
-        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master",
-        "ext-json": "*"
+        "cboden/ratchet": "^0.4.1",
+        "rbwebdesigns/quizzerino-installer": "dev-master@dev",
+        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master@dev",
+        "ext-json": "*",
+        "symfony/dependency-injection": "^7.0",
+        "symfony/config": "^7.0",
+        "symfony/yaml": "^7.0",
+        "vlucas/phpdotenv": "^5.0"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
 	"autoload": {
         "psr-4": {
             "rbwebdesigns\\quizzerino\\": "app/",
@@ -37,6 +42,11 @@
         "installer-types": ["quizzerino-question-source"],
         "installer-paths": {
             "quizzes/{$name}/": ["type:quizzerino-question-source"]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "rbwebdesigns/quizzerino-installer": true
         }
     }
 }

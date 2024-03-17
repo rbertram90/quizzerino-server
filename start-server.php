@@ -3,8 +3,10 @@
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
-use rbwebdesigns\quizzerino\Game;
 use rbwebdesigns\quizzerino\Logger;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
  * Quizzerino game server
@@ -16,7 +18,7 @@ use rbwebdesigns\quizzerino\Logger;
  * @author R Bertram <ricky@rbwebdesigns.co.uk>
  */
 
-$version = '2020-10-25';
+$version = '2022-03-17';
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -25,26 +27,21 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-if (!file_exists(__DIR__ . '/config.json')) {
-    Logger::error("Please copy config_default.json to config.json and check server variables");
-    exit;
-}
+$container = new ContainerBuilder();
+$loader = new YamlFileLoader($container, new FileLocator(__DIR__));
+$loader->load('services.yml');
 
 print "***********************************\n\n";
 print "   Welcome to Quizzerino!          \n\n";
 print "   Build {$version}                \n\n";
 print "***********************************\n\n";
 
-$config = json_decode(file_get_contents(__DIR__ . '/config.json'), true);
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+$_ENV['APP_ROOT'] = __DIR__;
 
-Logger::info("Loaded configuration:");
-
-foreach ($config as $key => $value) {
-    define(strtoupper($key), $value);
-    Logger::info(strtoupper($key) .' = '. $value);
-}
-
-define('ROOT_DIR', __DIR__);
+$messenger = $container->get('messenger');
+$messenger->setContainer($container);
 
 /**
  * Create the server class, each of the layers provide part of the request
@@ -78,16 +75,17 @@ define('ROOT_DIR', __DIR__);
  * for onOpen, onClose, onMessage and onError methods.
  */
 
-$game = new Game();
+
 
 $server = IoServer::factory(
     new HttpServer(
-        new WsServer($game)
+        new WsServer($messenger)
     ),
-    SERVER_PORT
+    $_ENV['SERVER_PORT'] ?? 8080
 );
 
-$game->setServer($server);
+$game = $container->get('game');
+$game->server($server);
 
 Logger::info("Game server ready, awaiting new connections...");
 

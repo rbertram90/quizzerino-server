@@ -1,0 +1,29 @@
+services:
+  playermanager:
+    class: \rbwebdesigns\quizzerino\PlayerManager
+    arguments: []
+  messenger:
+    class: \rbwebdesigns\quizzerino\Messenger
+    arguments: ['@playermanager']
+  logger:
+    class: \rbwebdesigns\quizzerino\Logger
+    arguments: []
+  game:
+    class: \rbwebdesigns\quizzerino\Game
+    arguments: ['@playermanager', '@messenger']
+  # Events
+  events.playerconnected:
+    class: \rbwebdesigns\quizzerino\Events\PlayerConnected
+    arguments: ['@game', '@playermanager', '@messenger']
+  events.answersubmitted:
+    class: \rbwebdesigns\quizzerino\Events\AnswerSubmitted
+    arguments: ['@game', '@playermanager', '@messenger']
+  events.gamereset:
+    class: \rbwebdesigns\quizzerino\Events\GameReset
+    arguments: []
+  events.gamestarted:
+    class: \rbwebdesigns\quizzerino\Events\GameStarted
+    arguments: ['@game']
+  events.roundexpired:
+    class: \rbwebdesigns\quizzerino\Events\RoundRxpired
+    arguments: ['@game']
