@@ -110,7 +110,7 @@ class PlayerManager {
     /**
      * Get all players currently connected
      */
-    public function getActivePlayers()
+    public function getActivePlayers(): array
     {
         $active = [];
         foreach ($this->players as $player) {
@@ -129,7 +129,7 @@ class PlayerManager {
      * 
      * @param int $resourceId
      */
-    public function markPlayerAsInactive($resourceId)
+    public function disconnectPlayer($resourceId): ?Player
     {
         foreach ($this->players as $player) {
             if ($player->getConnection()->resourceId == $resourceId) {

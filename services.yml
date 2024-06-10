@@ -15,6 +15,9 @@ services:
   events.playerconnected:
     class: \rbwebdesigns\quizzerino\Events\PlayerConnected
     arguments: ['@game', '@playermanager', '@messenger']
+  events.playerdisconnected:
+    class: \rbwebdesigns\quizzerino\Events\PlayerDisconnected
+    arguments: ['@game', '@playermanager', '@messenger']
   events.answersubmitted:
     class: \rbwebdesigns\quizzerino\Events\AnswerSubmitted
     arguments: ['@game', '@playermanager', '@messenger']

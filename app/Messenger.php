@@ -24,6 +24,7 @@ class Messenger implements MessageComponentInterface
 
         self::$events = [
             'player_connected' => 'events.playerconnected',
+            'player_disconnected' => 'events.playerdisconnected',
             'start_game'       => 'events.gamestarted',
             'answer_submit'    => 'events.answersubmitted',
             'round_expired'    => 'events.roundexpired',
@@ -82,7 +83,8 @@ class Messenger implements MessageComponentInterface
         $this->clients->detach($conn);
         echo "Connection {$conn->resourceId} has disconnected\n";
 
-        $disconnectedPlayer = $this->playerManager->markPlayerAsInactive($conn->resourceId);
+        $event = $this->serviceContainer->get('events.playerdisconnected');
+        $event->run($conn, []);
     }
 
     /**
