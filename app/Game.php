@@ -212,7 +212,7 @@ class Game
                 if (is_dir($quizFolder)) {
                     if (file_exists($quizFolder .'/quizzes.json')) {
                         $quizzesJson = file_get_contents($quizFolder .'/quizzes.json');
-                        $this->quizList = json_decode($quizzesJson);
+                        array_push($this->quizList, ...json_decode($quizzesJson));
                     }
                 }
             }
