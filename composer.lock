@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "90b8b9e06878e9a422d558ca09cc7ae3",
+    "content-hash": "26be57f5d8e83dbf3fdfb0931ae748d0",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -1508,6 +1508,41 @@
                 "source": "https://github.com/ratchetphp/RFC6455/tree/v0.3.1"
             },
             "time": "2021-12-09T23:20:49+00:00"
+        },
+        {
+            "name": "rbwebdesigns/quizzerino-formula1-db-source",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rbertram90/quizzerino-f1-questions-source.git",
+                "reference": "c1c52bcb29f7d9a6898329b0ee4c6653381f5ded"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rbertram90/quizzerino-f1-questions-source/zipball/c1c52bcb29f7d9a6898329b0ee4c6653381f5ded",
+                "reference": "c1c52bcb29f7d9a6898329b0ee4c6653381f5ded",
+                "shasum": ""
+            },
+            "require": {
+                "rbwebdesigns/quizzerino-installer": "dev-master"
+            },
+            "default-branch": true,
+            "type": "quizzerino-question-source",
+            "extra": {
+                "installer-name": "Formula1DB"
+            },
+            "authors": [
+                {
+                    "name": "Ricky Bertram",
+                    "email": "ricky@rbwebdesigns.co.uk"
+                }
+            ],
+            "description": "Source questions from a database of Formula 1 statistics",
+            "support": {
+                "source": "https://github.com/rbertram90/quizzerino-f1-questions-source/tree/master",
+                "issues": "https://github.com/rbertram90/quizzerino-f1-questions-source/issues"
+            },
+            "time": "2024-06-12T19:57:52+00:00"
         },
         {
             "name": "rbwebdesigns/quizzerino-installer",
@@ -4051,7 +4086,7 @@
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
         "rbwebdesigns/quizzerino-installer": 20,
         "rbwebdesigns/quizzerino-open-trivia-db-source": 20

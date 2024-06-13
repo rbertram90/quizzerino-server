@@ -30,6 +30,10 @@ class AnswerSubmitted implements EventInterface
 
         if ($answer == $correctAnswer) {
             $player->score++;
+            $player->roundScores[] = 1;
+        }
+        else {
+            $player->roundScores[] = 0;
         }
 
         // send message to all clients that user has submitted

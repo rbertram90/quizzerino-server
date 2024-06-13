@@ -29,6 +29,14 @@ class PlayerDisconnected implements EventInterface
         // Disconnect player from game
         $player = $this->playerManager->disconnectPlayer($from->resourceId);
 
+        if (count($player->roundScores) === $this->game->currentQuestionNumber()) {
+            // Remove the last element so if they reconnect they can't get the
+            // points for the same question.
+            $lastScore = array_pop($player->roundScores);
+
+            $player->score -= $lastScore;
+        }
+
         // Notify all players
         $this->messenger->sendToAll([
             'type' => 'player_disconnected',

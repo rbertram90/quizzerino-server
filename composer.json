@@ -14,6 +14,10 @@
     "repositories": [
         {
             "type": "vcs",
+            "url": "https://github.com/rbertram90/quizzerino-f1-questions-source.git"
+        },
+        {
+            "type": "vcs",
             "url": "https://github.com/rbertram90/quizzerino-open-trivia-source.git"
         },
         {
@@ -23,15 +27,16 @@
     ],
     "require": {
         "cboden/ratchet": "^0.4.1",
-        "rbwebdesigns/quizzerino-installer": "dev-master@dev",
-        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master@dev",
+        "rbwebdesigns/quizzerino-installer": "dev-master",
+        "rbwebdesigns/quizzerino-open-trivia-db-source": "dev-master",
         "ext-json": "*",
         "symfony/dependency-injection": "^7.0",
         "symfony/config": "^7.0",
         "symfony/yaml": "^7.0",
-        "vlucas/phpdotenv": "^5.0"
+        "vlucas/phpdotenv": "^5.0",
+        "rbwebdesigns/quizzerino-formula1-db-source": "dev-master"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
 	"autoload": {
         "psr-4": {
             "rbwebdesigns\\quizzerino\\": "app/",

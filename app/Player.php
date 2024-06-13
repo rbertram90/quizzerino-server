@@ -12,7 +12,8 @@ class Player {
     // has the player disconnected?
     public $isActive;
     public PlayerStatus $status;
-    public $score;
+    public int $score = 0;
+    public array $roundScores = [];
     public $icon;
 
     protected ConnectionInterface $connection;
@@ -25,7 +26,6 @@ class Player {
         $this->connection = $connection;
         $this->isActive = true;
         $this->status = PlayerStatus::STATUS_CONNECTED;
-        $this->score = 0;
         $this->reset();
     }
 
@@ -50,6 +50,7 @@ class Player {
     public function reset()
     {
         $this->score = 0;
+        $this->roundScores = [];
     }
 
     /**

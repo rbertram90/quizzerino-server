@@ -95,6 +95,7 @@ class Game
 
         $messageData = [
             'type' => 'round_start',
+            'previousquestion' => $this->currentQuestion(),
             'question' => $this->getNextQuestion(),
             'questionNumber' => $this->currentQuestionNumber,
             'roundTime' => $this->timeLimit,

@@ -66,7 +66,7 @@ class PlayerConnected implements EventInterface
         if ($this->game->status() == GameStatus::GAME_STATUS_PLAYERS_CHOOSING) {
             $this->messenger->sendMessage($from, [
                 'type' => 'round_start',
-                'question' => $this->game->getNextQuestion(),
+                'question' => $this->game->currentQuestion(),
                 'questionNumber' => $this->game->currentQuestionNumber(),
                 // 'roundTime' => $this->roundTime,
                 'players' => $this->playerManager->getActivePlayers()
