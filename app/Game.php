@@ -19,7 +19,7 @@ use React\EventLoop\TimerInterface;
  * Dynamic getters/setters:
  * 
  * @method self|string quizId(?string $quizId)
- * @method self|int status(?int $status)
+ * @method self|\rbwebdesigns\quizzerino\Enum\GameStatus status(?int $status)
  * @method self|int questionsPerRound(?int $questionCount)
  * @method self|int timeLimit(?int $questionCount)
  * @method self|\Ratchet\Server\IoServer server(?\Ratchet\Server\IoServer $server)
@@ -120,6 +120,8 @@ class Game
      */
     protected function endQuiz()
     {
+        $this->status(GameStatus::GAME_STATUS_GAME_WON);
+
         $messageData = [
             'type' => 'game_end',
             'players' => $this->playerManager->getActivePlayers()
@@ -158,6 +160,13 @@ class Game
         $controller = $this->getQuizController();
         $this->currentQuestion = $controller->getQuestion();
         return $this->currentQuestion;
+    }
+
+    /**
+     * Reset the question number back to 0.
+     */
+    protected function resetQuestionNumber() {
+        $this->currentQuestionNumber = 0;
     }
 
     /**

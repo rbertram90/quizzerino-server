@@ -20,7 +20,10 @@ class GameStarted implements EventInterface
 
     public function run(ConnectionInterface $from, array $options)
     {
-        if ($this->game->status() !== GameStatus::GAME_STATUS_AWAITING_START) {
+        if (! in_array($this->game->status(), [
+            GameStatus::GAME_STATUS_AWAITING_START,
+            GameStatus::GAME_STATUS_GAME_WON
+        ])) {
             return;
         }
 
@@ -28,6 +31,8 @@ class GameStarted implements EventInterface
             // Options: 0,1,2,3 - for Infinite,10,20,30 seconds respectively.
             $timeLimit *= 10;
         }
+
+        $this->game->resetQuestionNumber();
 
         $this->game->quizId($options['quiz'])
             ->questionsPerRound($options['numberOfQuestions'])
