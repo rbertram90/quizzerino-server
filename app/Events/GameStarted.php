@@ -37,6 +37,8 @@ class GameStarted implements EventInterface
         $this->game->quizId($options['quiz'])
             ->questionsPerRound($options['numberOfQuestions'])
             ->timeLimit($timeLimit)
-            ->status(GameStatus::GAME_STATUS_PLAYERS_CHOOSING)->nextRound();
+            ->status(GameStatus::GAME_STATUS_PLAYERS_CHOOSING)
+            ->config($options['fieldSettings'])
+            ->nextRound();
     }
 }

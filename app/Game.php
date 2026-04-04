@@ -21,7 +21,8 @@ use React\EventLoop\TimerInterface;
  * @method self|string quizId(?string $quizId)
  * @method self|\rbwebdesigns\quizzerino\Enum\GameStatus status(?int $status)
  * @method self|int questionsPerRound(?int $questionCount)
- * @method self|int timeLimit(?int $questionCount)
+ * @method self|int timeLimit(?int $timeLimit)
+ * @method self|array config(?array $config)
  * @method self|\Ratchet\Server\IoServer server(?\Ratchet\Server\IoServer $server)
  * @method int currentQuestionNumber()
  * @method array|null currentQuestion()
@@ -29,7 +30,7 @@ use React\EventLoop\TimerInterface;
 class Game
 {
     // This will contain the list of quizzes that
-    // are available to do on the server
+    // are available to do on the server as plain objects.
     protected ?array $quizList = null;
 
     // Which quiz are we running - this is set
@@ -50,6 +51,7 @@ class Game
     protected ?array $currentQuestion = null;
     protected int $timeLimit = 0;
     protected int $questionsPerRound = 5;
+    protected array $config = [];
 
     // Exception codes
     public const E_DUPLICATE_USERNAME = 1;
@@ -187,7 +189,7 @@ class Game
                     $data = $quiz->settings;
                 }
 
-                $this->quizController = new $controllerName($data);
+                $this->quizController = new $controllerName($data, $this->config);
 
                 if ($this->quizController && $this->quizController instanceof SourceInterface) {
                     return $this->quizController;
@@ -211,7 +213,7 @@ class Game
             $this->quizList = [];
 
             // Scan the quizzes directory
-            $quizParentFolder = $_ENV['APP_ROOT'] .'/'. $_ENV['QUIZ_FOLDER'];
+            $quizParentFolder = $_ENV['APP_ROOT'] .'/'. ($_ENV['QUIZ_FOLDER'] ?? "quizzes");
             $folders = scandir($quizParentFolder);
 
             foreach ($folders as $folder) {

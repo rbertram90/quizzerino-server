@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
  * @author R Bertram <ricky@rbwebdesigns.co.uk>
  */
 
-$version = '2024-06-13';
+$version = '2026-04-04';
 
 require __DIR__ . '/vendor/autoload.php';
 

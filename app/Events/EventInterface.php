@@ -8,6 +8,9 @@ interface EventInterface
 {
     /**
      * Response to the event.
+     * 
+     * @param ConnectionInterface $from
+     * @param array $options Settings from the quiz definition json (json decoded using associative flag)
      */
     public function run(ConnectionInterface $from, array $options);
 }
